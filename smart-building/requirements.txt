@@ -12,8 +12,8 @@ streamlit-autorefresh>=1.0.1,<2.0
 # LLM integration
 ollama>=0.3.1,<0.4.0
 
-# MCP protocol
-mcp>=1.1.2,<2.0
+# MCP protocol (FastMCP uses the official MCP transport and SDK)
+fastmcp==2.1.2
 
 # Reliability and utilities
 tenacity>=8.5,<9.0

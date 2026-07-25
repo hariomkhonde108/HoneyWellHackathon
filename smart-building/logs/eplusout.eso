@@ -1,0 +1,62 @@
+Program Version,EnergyPlus, Version 26.1.0-6f2e40d102, YMD=2026.07.25 21:25
+1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]
+2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType
+3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested
+4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested
+5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested
+6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested
+7,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly
+8,1,SPACE1-1 PEOPLE 1,People Occupant Count [] !TimeStep
+9,1,SPACE2-1 PEOPLE 1,People Occupant Count [] !TimeStep
+10,1,SPACE3-1 PEOPLE 1,People Occupant Count [] !TimeStep
+11,1,SPACE4-1 PEOPLE 1,People Occupant Count [] !TimeStep
+12,1,SPACE5-1 PEOPLE 1,People Occupant Count [] !TimeStep
+455,1,PLENUM-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+457,1,SPACE1-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+458,1,SPACE2-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+459,1,SPACE3-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+460,1,SPACE4-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+461,1,SPACE5-1,Zone Mean Air Dewpoint Temperature [C] !Hourly
+462,1,PLENUM-1,Zone Air Temperature [C] !Hourly
+597,1,PLENUM-1,Zone Air System Sensible Heating Rate [W] !Hourly
+598,1,PLENUM-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+599,1,PLENUM-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+600,1,SPACE1-1,Zone Air Temperature [C] !Hourly
+663,1,SPACE1-1,Zone Air System Sensible Heating Rate [W] !Hourly
+664,1,SPACE1-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+665,1,SPACE1-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+666,1,SPACE2-1,Zone Air Temperature [C] !Hourly
+729,1,SPACE2-1,Zone Air System Sensible Heating Rate [W] !Hourly
+730,1,SPACE2-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+731,1,SPACE2-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+732,1,SPACE3-1,Zone Air Temperature [C] !Hourly
+795,1,SPACE3-1,Zone Air System Sensible Heating Rate [W] !Hourly
+796,1,SPACE3-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+797,1,SPACE3-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+798,1,SPACE4-1,Zone Air Temperature [C] !Hourly
+861,1,SPACE4-1,Zone Air System Sensible Heating Rate [W] !Hourly
+862,1,SPACE4-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+863,1,SPACE4-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+864,1,SPACE5-1,Zone Air Temperature [C] !Hourly
+927,1,SPACE5-1,Zone Air System Sensible Heating Rate [W] !Hourly
+928,1,SPACE5-1,Zone Air System Sensible Cooling Rate [W] !Hourly
+929,1,SPACE5-1,Zone Thermostat Cooling Setpoint Temperature [C] !TimeStep
+930,1,HOT WATER LOOP,Plant Supply Side Cooling Demand Rate [W] !Hourly
+931,1,HOT WATER LOOP,Plant Supply Side Heating Demand Rate [W] !Hourly
+932,1,CHILLED WATER LOOP,Plant Supply Side Cooling Demand Rate [W] !Hourly
+933,1,CHILLED WATER LOOP,Plant Supply Side Heating Demand Rate [W] !Hourly
+1081,1,Whole Building,Facility Total Electricity Demand Rate [W] !TimeStep
+1144,1,SPACE1-1 ZONE COIL,Heating Coil Heating Rate [W] !Hourly
+1147,1,SPACE2-1 ZONE COIL,Heating Coil Heating Rate [W] !Hourly
+1150,1,SPACE3-1 ZONE COIL,Heating Coil Heating Rate [W] !Hourly
+1153,1,SPACE4-1 ZONE COIL,Heating Coil Heating Rate [W] !Hourly
+1156,1,SPACE5-1 ZONE COIL,Heating Coil Heating Rate [W] !Hourly
+1159,1,OA HEATING COIL 1,Heating Coil Heating Rate [W] !Hourly
+1162,1,MAIN HEATING COIL 1,Heating Coil Heating Rate [W] !Hourly
+1213,1,OA COOLING COIL 1,Cooling Coil Total Cooling Rate [W] !Hourly
+1214,1,OA COOLING COIL 1,Cooling Coil Sensible Cooling Rate [W] !Hourly
+1217,1,MAIN COOLING COIL 1,Cooling Coil Total Cooling Rate [W] !Hourly
+1218,1,MAIN COOLING COIL 1,Cooling Coil Sensible Cooling Rate [W] !Hourly
+1256,1,CENTRAL BOILER,Boiler Heating Rate [W] !Hourly
+1282,1,CENTRAL BOILER,Boiler NaturalGas Rate [W] !Hourly
+138

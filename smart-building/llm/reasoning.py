@@ -13,7 +13,7 @@ from ollama import RequestError, ResponseError
 from controller.actuators import ControlAction
 from controller.sensors import SensorSnapshot
 from llm.parser import LLMOutputParser, LLMOutputValidationError
-from llm.prompt import PromptBuilder
+from llm.prompt import PromptBuilder, PromptSafetyLimits
 
 
 @dataclass(frozen=True)
@@ -206,6 +206,10 @@ def build_ollama_reasoning_engine(
 	temperature: float = 0.0,
 	top_p: float = 0.9,
 	seed: int = 42,
+	cooling_min: float = 22.0,
+	cooling_max: float = 27.0,
+	fan_min: float = 30.0,
+	fan_max: float = 90.0,
 ) -> OllamaReasoningEngine:
 	"""Factory for creating a configured Ollama Qwen2.5 reasoning engine."""
 	config = OllamaConfig(
@@ -218,4 +222,20 @@ def build_ollama_reasoning_engine(
 		top_p=top_p,
 		seed=seed,
 	)
-	return OllamaReasoningEngine(config=config)
+	prompt_limits = PromptSafetyLimits(
+		cooling_min=cooling_min,
+		cooling_max=cooling_max,
+		fan_min=fan_min,
+		fan_max=fan_max,
+	)
+	parser = LLMOutputParser(
+		cooling_min=cooling_min,
+		cooling_max=cooling_max,
+		fan_min=fan_min,
+		fan_max=fan_max,
+	)
+	return OllamaReasoningEngine(
+		config=config,
+		prompt_builder=PromptBuilder(limits=prompt_limits),
+		parser=parser,
+	)

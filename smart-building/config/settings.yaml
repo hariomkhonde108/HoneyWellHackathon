@@ -5,10 +5,16 @@ project:
 
 simulation:
   energyplus:
-    version: "23.x"
+    version: "26.1"
+    install_path: "C:/EnergyPlusV26-1-0"
     idf_path: "energyplus/building.idf"
     weather_path: "energyplus/weather.epw"
     api_mode: "pyenergyplus"
+    control_zone: "SPACE1-1"
+    # Supply Fan 1 EMS actuator is air mass flow (kg/s); LLM controls percent.
+    fan_max_air_mass_flow_kg_s: 3.0
+    reconnect_attempts: 2
+    reconnect_delay_seconds: 2
   control_interval_steps: 5
   dashboard_publish_interval_seconds: 2
 

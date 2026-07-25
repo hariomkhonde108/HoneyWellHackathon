@@ -12,10 +12,11 @@ import sys
 
 import yaml
 
+from controller.actuators import SafetyLimits
 from controller.controller import build_default_controller
 from llm.reasoning import OllamaReasoningEngine, build_ollama_reasoning_engine
-from mcp.server import MCPServerConfig, SmartBuildingMCPServer
-from mcp.tools import ControllerToolContext, build_controller_tool_router
+from building_mcp.server import SmartBuildingMCPServer,MCPServerConfig
+from building_mcp.tools import ControllerToolContext, build_controller_tool_router
 
 
 DEFAULT_CONFIG_PATH = Path("config/settings.yaml")
@@ -61,6 +62,15 @@ def build_runtime_components(settings: dict[str, Any], project_root: Path) -> tu
 	simulation_cfg = settings["simulation"]["energyplus"]
 	llm_cfg = settings["llm"]
 	mcp_cfg = settings.get("mcp", {})
+	safety_cfg = settings.get("safety", {})
+	cooling_cfg = safety_cfg.get("cooling_setpoint_c", {})
+	fan_cfg = safety_cfg.get("fan_speed_percent", {})
+	safety_limits = SafetyLimits(
+		cooling_min=float(cooling_cfg.get("min", 22.0)),
+		cooling_max=float(cooling_cfg.get("max", 27.0)),
+		fan_min=float(fan_cfg.get("min", 30.0)),
+		fan_max=float(fan_cfg.get("max", 90.0)),
+	)
 
 	idf_path = project_root / str(simulation_cfg["idf_path"])
 	weather_path = project_root / str(simulation_cfg["weather_path"])
@@ -80,6 +90,10 @@ def build_runtime_components(settings: dict[str, Any], project_root: Path) -> tu
 		temperature=float(llm_cfg.get("temperature", 0.0)),
 		top_p=float(llm_cfg.get("top_p", 0.9)),
 		seed=int(llm_cfg.get("seed", 42)),
+		cooling_min=safety_limits.cooling_min,
+		cooling_max=safety_limits.cooling_max,
+		fan_min=safety_limits.fan_min,
+		fan_max=safety_limits.fan_max,
 	)
 	assert isinstance(reasoning_engine, OllamaReasoningEngine)
 
@@ -89,7 +103,15 @@ def build_runtime_components(settings: dict[str, Any], project_root: Path) -> tu
 		output_dir=output_dir,
 		decision_engine=reasoning_engine,
 		control_interval_steps=int(settings["simulation"].get("control_interval_steps", 5)),
+		zone_name=str(simulation_cfg.get("control_zone", "SPACE1-1")),
+		energyplus_install_path=_optional_path(simulation_cfg.get("install_path")),
 		telemetry_path=telemetry_path,
+		safety_limits=safety_limits,
+		max_setpoint_delta=_optional_float(cooling_cfg.get("max_delta_per_ai_tick")),
+		max_fan_delta=_optional_float(fan_cfg.get("max_delta_per_ai_tick")),
+		fan_max_air_mass_flow_kg_s=float(simulation_cfg.get("fan_max_air_mass_flow_kg_s", 3.0)),
+		reconnect_attempts=int(simulation_cfg.get("reconnect_attempts", 2)),
+		reconnect_delay_seconds=float(simulation_cfg.get("reconnect_delay_seconds", 2.0)),
 	)
 
 	mcp_context = ControllerToolContext(
@@ -229,6 +251,18 @@ def require_file(path: Path, label: str) -> None:
 	"""Raises a clear error if a required runtime file is missing."""
 	if not path.exists():
 		raise FileNotFoundError(f"{label} file not found at: {path}")
+
+
+def _optional_path(value: Any) -> Path | None:
+	"""Returns a Path for a configured optional filesystem value."""
+	if value is None or not str(value).strip():
+		return None
+	return Path(str(value))
+
+
+def _optional_float(value: Any) -> float | None:
+	"""Returns a float for optional numeric configuration values."""
+	return None if value is None else float(value)
 
 
 if __name__ == "__main__":

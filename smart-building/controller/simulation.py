@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 import logging
+import os
+import sys
 import time
-
-from pyenergyplus.api import EnergyPlusAPI
 
 
 ControlCallback = Callable[["EnergyPlusSimulation"], None]
@@ -40,6 +40,9 @@ class SimulationConfig:
 	idf_path: Path
 	weather_path: Path
 	output_dir: Path
+	energyplus_install_path: Path | None = None
+	reconnect_attempts: int = 2
+	reconnect_delay_seconds: float = 2.0
 
 
 class EnergyPlusSimulation:
@@ -53,7 +56,7 @@ class EnergyPlusSimulation:
 		self._config = config
 		self._logger = logger or logging.getLogger(self.__class__.__name__)
 
-		self.api = EnergyPlusAPI()
+		self.api = _create_energyplus_api(config.energyplus_install_path)
 		self.state = self.api.state_manager.new_state()
 		self.exchange = self.api.exchange
 		self.runtime = self.api.runtime
@@ -106,7 +109,7 @@ class EnergyPlusSimulation:
 		"""Writes a value to a previously registered actuator."""
 		handle = self._actuator_handles.get(actuator_key)
 		if handle is None or handle < 0:
-			self._logger.warning("Actuator handle unavailable for %s", actuator_key)
+			self._logger.debug("Actuator handle unavailable for %s", actuator_key)
 			return False
 		self.exchange.set_actuator_value(self.state, handle, float(value))
 		return True
@@ -124,20 +127,39 @@ class EnergyPlusSimulation:
 		]
 
 	def run(self) -> int:
-		"""Runs EnergyPlus and blocks until completion."""
-		self.runtime.callback_begin_zone_timestep_after_init_heat_balance(
-			self.state,
-			self._on_control_timestep,
-		)
+		"""Runs EnergyPlus, reconnecting after an unexpected runtime failure."""
 		args = self.build_energyplus_args()
-		self._is_running = True
-		self._logger.info("Starting EnergyPlus with args: %s", args)
-		try:
-			return_code = self.runtime.run_energyplus(self.state, args)
-			self._logger.info("EnergyPlus exited with code %s", return_code)
-			return int(return_code)
-		finally:
+		max_attempts = max(0, self._config.reconnect_attempts)
+
+		for attempt in range(max_attempts + 1):
+			self.runtime.callback_begin_zone_timestep_after_init_heat_balance(
+				self.state,
+				self._on_control_timestep,
+			)
+			self._is_running = True
+			self._logger.info("Starting EnergyPlus with args: %s", args)
+			try:
+				return_code = int(self.runtime.run_energyplus(self.state, args))
+			except Exception as exc:
+				self._logger.exception("EnergyPlus runtime failure: %s", exc)
+				return_code = 1
+
+			if return_code == 0 or attempt >= max_attempts:
+				self._is_running = False
+				self._logger.info("EnergyPlus exited with code %s", return_code)
+				return return_code
+
+			self._logger.debug(
+				"EnergyPlus disconnected (code %s); reconnecting (%s/%s)",
+				return_code,
+				attempt + 1,
+				max_attempts,
+			)
 			self._is_running = False
+			time.sleep(max(0.0, self._config.reconnect_delay_seconds))
+			self._reset_state()
+
+		return 1  # Unreachable, retained for static type checkers.
 
 	def stop(self) -> None:
 		"""Requests simulation stop through the runtime API."""
@@ -178,7 +200,7 @@ class EnergyPlusSimulation:
 			)
 			self._variable_handles[key] = int(handle)
 			if handle < 0:
-				self._logger.warning(
+				self._logger.debug(
 					"Invalid variable handle for %s (%s / %s)",
 					key,
 					spec.variable_name,
@@ -194,7 +216,7 @@ class EnergyPlusSimulation:
 			)
 			self._actuator_handles[key] = int(handle)
 			if handle < 0:
-				self._logger.warning(
+				self._logger.debug(
 					"Invalid actuator handle for %s (%s / %s / %s)",
 					key,
 					spec.component_type,
@@ -203,3 +225,50 @@ class EnergyPlusSimulation:
 				)
 
 		self._handles_initialized = True
+
+	def _reset_state(self) -> None:
+		"""Creates a fresh EnergyPlus state and restores registered variables."""
+		self.state = self.api.state_manager.new_state()
+		self._variable_handles.clear()
+		self._actuator_handles.clear()
+		self._handles_initialized = False
+		self.timestep_index = 0
+		self._last_heartbeat_ts = 0.0
+		for spec in self._variable_specs.values():
+			self.exchange.request_variable(self.state, spec.variable_name, spec.variable_key)
+
+
+def _create_energyplus_api(install_path: Path | None) -> Any:
+	"""Loads PyEnergyPlus from an installed EnergyPlus distribution.
+
+	EnergyPlus ships its Python API in ``python_lib`` rather than PyPI.  The
+	configured installation path takes precedence, with ``ENERGYPLUS_INSTALL_PATH``
+	as a portable deployment override.
+	"""
+	configured_path = install_path or _path_from_environment()
+	if configured_path is not None:
+		if not (configured_path / "pyenergyplus").exists():
+			raise RuntimeError(
+			f"EnergyPlus installation does not contain pyenergyplus: {configured_path}"
+		)
+		if str(configured_path) not in sys.path:
+			sys.path.insert(0, str(configured_path))
+		if hasattr(os, "add_dll_directory"):
+			os.add_dll_directory(str(configured_path))
+
+	try:
+		from pyenergyplus.api import EnergyPlusAPI
+	except ImportError as exc:
+		hint = (
+			"Configure simulation.energyplus.install_path or set "
+			"ENERGYPLUS_INSTALL_PATH to the EnergyPlus installation directory."
+		)
+		raise RuntimeError(f"PyEnergyPlus API is unavailable. {hint}") from exc
+
+	return EnergyPlusAPI()
+
+
+def _path_from_environment() -> Path | None:
+	"""Gets an optional EnergyPlus installation path from the environment."""
+	value = os.environ.get("ENERGYPLUS_INSTALL_PATH")
+	return Path(value) if value else None

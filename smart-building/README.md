@@ -1,11 +1,14 @@
 # AI-Powered Autonomous Smart Building Optimization System
 
-Production-quality Proof of Concept scaffold for a hackathon project that combines EnergyPlus, MCP, and a local open-source LLM (Ollama + Qwen2.5 7B Instruct) to optimize HVAC controls autonomously.
+Production-quality Proof of Concept for a hackathon project that combines EnergyPlus, MCP, and a local open-source LLM (Ollama + Qwen2.5 7B Instruct) to optimize HVAC controls autonomously.
 
 ## Status
 
-This repository currently contains complete project structure and configuration scaffolding only.
-No application logic has been implemented yet by design.
+The controller is fully implemented: it registers PyEnergyPlus variables and
+actuators, reads live telemetry through MCP tools, requests a schema-validated
+Ollama decision, applies safe control commands, and continuously records
+dashboard telemetry. It falls back to the previous safe action on an LLM timeout
+or invalid output and skips cycles with missing required sensors.
 
 ## Project Structure
 
@@ -65,21 +68,31 @@ EnergyPlus -> Sensor Collection -> MCP Tools -> LLM Reasoning -> Structured JSON
 1. Create and activate a virtual environment.
 2. Install dependencies:
    - `pip install -r requirements.txt`
-3. Place your actual EnergyPlus assets:
-   - `energyplus/building.idf`
-   - `energyplus/weather.epw`
-4. Update any local paths/settings in `config/settings.yaml`.
+3. Set `simulation.energyplus.install_path` in `config/settings.yaml` to your
+   EnergyPlus installation, or set `ENERGYPLUS_INSTALL_PATH`. This project is
+   preconfigured for `C:/EnergyPlusV26-1-0`.
+4. The repository includes the EnergyPlus `5ZoneAirCooled` reference model and
+   Chicago TMY3 weather data. The configured controlled zone is `SPACE1-1`.
 
-## Next Implementation Steps
+## Run
 
-1. Implement EnergyPlus runtime wrapper and callback lifecycle in `controller/simulation.py`.
-2. Implement sensor and actuator interfaces in `controller/sensors.py` and `controller/actuators.py`.
-3. Implement MCP server/tool registry in `mcp/server.py` and `mcp/tools.py`.
-4. Implement deterministic prompting and JSON parser in `llm/prompt.py` and `llm/parser.py`.
-5. Implement orchestration loop and fault-tolerance in `controller/controller.py`.
-6. Implement dashboard metrics and charts in `dashboard/app.py` and `dashboard/charts.py`.
+Start Ollama and pull the model once:
+
+```powershell
+ollama pull qwen2.5:7b-instruct
+```
+
+Start the integrated controller and dashboard:
+
+```powershell
+.\.venv\Scripts\python.exe main.py
+```
+
+The dashboard is served on `http://localhost:8501`. To expose only the MCP
+server over standard input/output, set `runtime.mode: mcp_only` in the YAML.
 
 ## Notes
 
-- This scaffold intentionally avoids placeholder logic and runtime behavior.
-- The next phase should implement modules incrementally with tests per subsystem.
+- PyEnergyPlus is supplied by the local EnergyPlus installation, not PyPI.
+- The supplied EnergyPlus reference model uses `Supply Fan 1` and `LIGHTS-1`;
+  change the bindings in `controller/actuators.py` when using a different IDF.

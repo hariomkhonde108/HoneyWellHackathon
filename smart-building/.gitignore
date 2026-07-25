@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+env/
+.venv-broken-20260725/
+
+# VS Code
+.vscode/
