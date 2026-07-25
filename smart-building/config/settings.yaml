@@ -1,0 +1,67 @@
+project:
+  name: smart-building
+  environment: development
+  timezone: UTC
+
+simulation:
+  energyplus:
+    version: "23.x"
+    idf_path: "energyplus/building.idf"
+    weather_path: "energyplus/weather.epw"
+    api_mode: "pyenergyplus"
+  control_interval_steps: 5
+  dashboard_publish_interval_seconds: 2
+
+llm:
+  provider: "ollama"
+  model: "qwen2.5:7b-instruct"
+  host: "http://localhost:11434"
+  request_timeout_seconds: 20
+  max_retries_on_invalid_json: 1
+  max_tokens: 150
+  temperature: 0.0
+  top_p: 0.9
+  seed: 42
+
+mcp:
+  transport: "stdio"
+  server_name: "smart-building-mcp"
+  server_version: "0.1.0"
+  embedded_with_controller: true
+  allow_actuation_tools: true
+  max_tool_calls_per_cycle: 8
+  tool_timeout_seconds: 5
+
+safety:
+  objective_mode: "balanced"
+  fallback_strategy: "use_previous_control"
+  cooling_setpoint_c:
+    min: 22.0
+    max: 27.0
+    max_delta_per_ai_tick: 1.0
+  fan_speed_percent:
+    min: 30
+    max: 90
+    max_delta_per_ai_tick: 10
+  lighting_modes:
+    - "ON"
+    - "OFF"
+
+telemetry:
+  persist_csv: true
+  output_dir: "logs"
+  file_prefix: "telemetry"
+  rolling_buffer_size: 5000
+
+dashboard:
+  host: "0.0.0.0"
+  port: 8501
+  refresh_seconds: 2
+  emergency_stop_enabled: true
+
+logging:
+  level: "INFO"
+  format: "json"
+  file_path: "logs/system.log"
+  rotate_max_bytes: 10485760
+  rotate_backup_count: 5
