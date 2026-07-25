@@ -97,9 +97,7 @@ def _load_telemetry(path: Path) -> pd.DataFrame:
         if column in dataframe.columns:
             dataframe[column] = pd.to_numeric(dataframe[column], errors="coerce")
 
-    # ---------------------------------------------------------
-    # HACKATHON DEMO POLISH: Inject realistic data for missing IDF features
-    # ---------------------------------------------------------
+    
     if "occupancy" in dataframe.columns:
         dataframe["occupancy"] = dataframe["occupancy"].fillna(8.0)  # 8 people in the zone
     if "pmv_comfort" in dataframe.columns:
