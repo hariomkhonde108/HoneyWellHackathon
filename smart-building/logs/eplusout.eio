@@ -1,4 +1,4 @@
-Program Version,EnergyPlus, Version 26.1.0-6f2e40d102, YMD=2026.07.25 21:25
+Program Version,EnergyPlus, Version 26.1.0-6f2e40d102, YMD=2026.07.26 00:39
 ! <Version>, Version ID
  Version, 26.1
 ! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
@@ -804,13 +804,3 @@ HeatTransfer Surface,C5-1,Roof,,CTF - ConductionTransferFunction,CLNG-1,1.533,1.
 ! <Environment:WarmupDays>, NumberofWarmupDays
 Environment,RUN PERIOD 1,WeatherFileRunPeriod,01/01/2013,12/31/2013,Tuesday,365,Use RunPeriod Specified Day,Yes,Yes,No,Yes,Yes,Clark and Allen
 Environment:Daylight Saving,No,
-Environment:WarmupDays,  6
-! <Tabular Report>,Style,Unit Conversion, Format Reals
-Tabular Report,HTML,None,Yes
-! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
- Warmup Convergence Information,PLENUM-1,RunPeriod: RUN PERIOD 1,0.1077111336,5.8811373034E-002,Pass,Pass,4.3812761257E-002,0.1392110849,Pass,Pass
- Warmup Convergence Information,SPACE1-1,RunPeriod: RUN PERIOD 1,0.1152720976,0.2970646935,Pass,Pass,4.2354409273,23.4501557429,Pass,Pass
- Warmup Convergence Information,SPACE2-1,RunPeriod: RUN PERIOD 1,0.1453411145,0.3166139160,Pass,Pass,5.4990650821,41.6230122804,Pass,Pass
- Warmup Convergence Information,SPACE3-1,RunPeriod: RUN PERIOD 1,0.1152326021,0.2930156341,Pass,Pass,1.8001750021,14.0844119294,Pass,Pass
- Warmup Convergence Information,SPACE4-1,RunPeriod: RUN PERIOD 1,0.1153605318,0.3169213087,Pass,Pass,0.7381533244,3.7072570046,Pass,Pass
- Warmup Convergence Information,SPACE5-1,RunPeriod: RUN PERIOD 1,9.0561532110E-002,0.1837491294,Pass,Pass,0.7931375751,3.1814335448,Pass,Pass
